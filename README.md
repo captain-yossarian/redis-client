@@ -1,2 +1,2 @@
 # redis-client
-Naive redis client for learning purpose
+I have created this repo to become more familiar with Redis protocol, Rust and tokio crate.
