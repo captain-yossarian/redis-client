@@ -12,4 +12,25 @@ impl RESP {
             format!("{}${}{}{}{}", acc, elem.len(), CRLF, elem, CRLF)
         })
     }
+    pub fn parse(response: Vec<u8>) {
+        let first_byte = response.first();
+        match first_byte {
+            Some(byte) => match byte {
+                36 => {
+                    if let Some(length) = response.get(1) {
+                        let ascii = length.to_string();
+                        let num = ascii.parse::<usize>();
+                        println!("ASCI {}", ascii);
+
+                        match num {
+                            Ok(n) => println!("Response {:?}", n),
+                            Err(_) => println!("Err"),
+                        }
+                    }
+                }
+                _ => println!("Response not an Array"),
+            },
+            None => println!("Response"),
+        }
+    }
 }

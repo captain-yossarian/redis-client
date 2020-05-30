@@ -12,8 +12,12 @@ async fn main() {
             let command = RESP::array(vec!["get", "foo"]);
             let write = conn.send(&command).await;
             let read = conn.read().await;
-            println!("Result {:?}", read);
+            println!("{}", 0x51);
+            match read {
+                Ok(val) => println!("Read Result {:?}", RESP::parse(val)),
+                Err(e) => println!("Read Error"),
+            }
         }
-        Err(e) => println!("Error"),
+        Err(e) => println!("Connection error"),
     }
 }

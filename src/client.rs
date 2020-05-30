@@ -1,6 +1,6 @@
 use std::io::Error;
 use std::str;
-use tokio::io::{self, AsyncWriteExt, BufWriter};
+use tokio::io::AsyncWriteExt;
 use tokio::net::TcpStream;
 use tokio::prelude::*;
 
@@ -21,12 +21,12 @@ impl Client {
         self.connection.write(result).await
     }
 
-    pub async fn read(&mut self) -> Result<String, Error> {
+    pub async fn read(&mut self) -> Result<Vec<u8>, Error> {
         let mut buffer: Vec<u8> = Vec::with_capacity(20);
         buffer.extend_from_slice(&[0; 50]);
 
         match self.connection.read(&mut buffer).await {
-            Ok(_) => Ok(format!("{}", String::from_utf8_lossy(&buffer))),
+            Ok(_) => Ok(buffer),
             Err(e) => Err(e),
         }
     }
