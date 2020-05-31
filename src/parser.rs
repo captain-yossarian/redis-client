@@ -42,7 +42,7 @@ fn handle_bulk_string(response: Vec<u8>) -> Result<String, ParseError> {
 }
 
 impl RESP {
-    pub fn array(args: Vec<&str>) -> String {
+    pub fn make_array(args: Vec<&str>) -> String {
         let initial = format!("{}{}{}", ARRAY_MARKER, args.len(), CRLF);
         args.iter().fold(initial, |acc, elem| {
             format!("{}${}{}{}{}", acc, elem.len(), CRLF, elem, CRLF)
