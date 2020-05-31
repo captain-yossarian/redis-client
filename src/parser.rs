@@ -13,6 +13,18 @@ const ARRAY_MARKER: &str = "*";
 
 pub struct RESP;
 
+// see https://redis.io/topics/protocol
+#[derive(Debug)]
+enum RedisData {
+    SimpleStrings, // +
+    Errors,        //  -
+    Integers,      // :
+    BulkStrings,   // $
+    Arrays,        // *
+    Null,
+    DoNotExist,
+}
+
 fn byte_to_char(byte: u8) -> char {
     byte as char
 }
@@ -41,6 +53,21 @@ fn handle_bulk_string(response: Vec<u8>) -> Result<String, ParseError> {
     bytes_to_string(response_data.to_vec())
 }
 
+fn get_data_type(bytes: &[u8]) -> RedisData {
+    let first_byte = bytes[0];
+    match first_byte {
+        36 => match &bytes[1..2] {
+            [45, 49] => RedisData::Null,
+            _ => RedisData::BulkStrings,
+        },
+        45 => RedisData::Errors,
+        43 => RedisData::SimpleStrings,
+        42 => RedisData::Arrays,
+        58 => RedisData::Integers,
+        _ => RedisData::DoNotExist,
+    }
+}
+
 impl RESP {
     pub fn make_array(args: Vec<&str>) -> String {
         let initial = format!("{}{}{}", ARRAY_MARKER, args.len(), CRLF);
@@ -50,6 +77,8 @@ impl RESP {
     }
     pub fn parse(response: Vec<u8>) -> Result<String, ParseError> {
         let first_byte = get_nth_byte(&response, 0)?;
+        println!("Data type {:?}", bytes_to_string(response.clone()));
+
         match first_byte {
             36 /*$*/ => handle_bulk_string(response),
             _ => Err(ParseError::Empty),

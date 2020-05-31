@@ -1,3 +1,4 @@
+use crate::parser::RESP;
 use std::io::Error;
 use std::str;
 use tokio::io::AsyncWriteExt;
@@ -16,12 +17,12 @@ impl Client {
         Ok(Client { connection })
     }
 
-    pub async fn send(&mut self, command: &str) -> Result<usize, Error> {
+    async fn send(&mut self, command: &str) -> Result<usize, Error> {
         let result = command.as_bytes();
         self.connection.write(result).await
     }
 
-    pub async fn read(&mut self) -> Result<Vec<u8>, Error> {
+    async fn read(&mut self) -> Result<Vec<u8>, Error> {
         let mut buffer: Vec<u8> = Vec::with_capacity(20);
         buffer.extend_from_slice(&[0; 50]);
 
@@ -29,5 +30,17 @@ impl Client {
             Ok(_) => Ok(buffer),
             Err(e) => Err(e),
         }
+    }
+
+    pub async fn get(&mut self, key: &str) -> Result<usize, Error> {
+        let command = RESP::make_array(vec!["get", key]);
+        self.send(&command).await;
+        self.read().await
+    }
+
+    pub async fn set(&mut self, key: &str, value: &str) -> Result<usize, Error> {
+        let command = RESP::make_array(vec!["set", key, value]);
+        println!("Command {}", command);
+        self.send(&command).await
     }
 }
