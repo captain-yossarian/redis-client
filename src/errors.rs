@@ -2,8 +2,6 @@ use std::error;
 use std::fmt;
 use std::num::ParseIntError;
 use std::string::FromUtf8Error;
-// Custom error type; can be any type which defined in the current crate
-// 💡 In here, we use a simple "unit struct" to simplify the example
 
 pub enum ParseError {
     Empty,
